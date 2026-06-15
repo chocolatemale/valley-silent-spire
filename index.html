@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VALLEY — 致敬《纪念碑谷》</title>
+<style>
+  html, body { margin:0; height:100%; overflow:hidden; background:#c997c9; }
+  canvas { display:block; touch-action:none; }
+  .overlay { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity 1.8s ease; }
+  .overlay .big { font-family:'Cormorant Garamond', Georgia, 'Songti SC', serif; font-weight:300; font-size:clamp(44px,7.5vw,104px); letter-spacing:.42em; padding-left:.42em; color:#fffdf8; text-shadow:0 2px 44px rgba(124,52,96,.55); }
+  .overlay .small { margin-top:16px; font-family:'Noto Serif SC','Songti SC',serif; font-weight:300; font-size:clamp(12px,1.3vw,16px); letter-spacing:.6em; padding-left:.6em; color:rgba(255,250,242,.88); text-shadow:0 1px 18px rgba(124,52,96,.5); }
+  #end .big { font-size:clamp(30px,4.6vw,62px); }
+  #hint { position:fixed; left:50%; bottom:4.5vh; transform:translateX(-50%); font:300 13px 'Noto Serif SC','Songti SC',serif; letter-spacing:.34em; color:rgba(255,252,246,.8); text-shadow:0 1px 12px rgba(120,60,90,.55); opacity:0; transition:opacity 1.4s ease; pointer-events:none; white-space:nowrap; }
+  #veil { position:fixed; inset:0; background:linear-gradient(#ffe8cd,#b98ecd); opacity:1; transition:opacity 2.4s ease; pointer-events:none; }
+  #again { margin-top:34px; font:300 13px 'Noto Serif SC','Songti SC',serif; letter-spacing:.4em; padding-left:.4em; color:rgba(255,252,246,.75); border:1px solid rgba(255,252,246,.45); border-radius:999px; padding:10px 26px 10px 32px; cursor:pointer; pointer-events:none; transition:all .4s ease; }
+  #end.show #again { pointer-events:auto; }
+  #again:hover { color:#fff; border-color:rgba(255,255,255,.9); background:rgba(255,255,255,.08); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Noto+Serif+SC:wght@200;300&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="overlay" id="title"><div class="big">V A L L E Y</div><div class="small">向《纪念碑谷》致敬</div></div>
+<div class="overlay" id="end"><div class="big">第 一 章</div><div class="small">寂静尖塔 · THE SILENT SPIRE</div><div id="again" onclick="location.reload()">再 来 一 次</div></div>
+<div id="hint">点击地面行走 · 点击转盘旋转空间</div>
+<div id="veil"></div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
