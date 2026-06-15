@@ -3,6 +3,10 @@
 一个用 Three.js 制作的《纪念碑谷》风格完整第一关:云海中的三座高塔、
 等距视角、柔和渐变配色,以及贯穿全关的单一机制——**旋转空间,改变连通**。
 
+## 在线试玩
+
+https://chocolatemale.github.io/valley-silent-spire/
+
 ## 运行
 
 需要本地静态服务器(ES Module + CDN 依赖):
