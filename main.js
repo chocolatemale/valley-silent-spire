@@ -59,6 +59,29 @@ const CHAPTERS = [
   { name: '云海长线', en: 'CLOUDLINE RUN', start: 'n6_0_-1', goal: 'n-3_5_-5', r1: 1, r2: 1, upper: false, task: '串起低桥、传送门与高空回廊', target: [-2.2, 3.7, -2.6], zoom: 1.02 },
   { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', goal: 'goal', r1: 1, r2: 1, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
 ];
+const CHAPTER_SIGILS = [
+  [],
+  ['n5_0_0'],
+  ['n2_0_-1'],
+  ['n3_0_1', 'n0_0.5_0'],
+  ['n-1_1.5_0', 'n-4_4_0'],
+  ['n-5_4_-1'],
+  ['n-5_4_0', 'n-8_4_-3'],
+  ['n-8_4_-3'],
+  ['pLow'],
+  ['n-6_5_-5', 'n-4_5_-5'],
+  ['n-5_5_-5'],
+  ['n-3_5_-5', 'n-5_5_-5'],
+  ['n-3_5_-5'],
+  ['n0_6_-5'],
+  ['n1_6_-4'],
+  ['n0_6_-4', 'n2_6_-5'],
+  ['n1_6_-5'],
+  ['n-5_4_1', 'n-8_4_-3'],
+  ['n2_0_0', 'pLow', 'n-5_5_-5'],
+  ['n4_0_0', 'pLow', 'n-3_5_-5'],
+];
+CHAPTERS.forEach((ch, i) => { ch.sigils = CHAPTER_SIGILS[i]; });
 
 const deg = THREE.MathUtils.degToRad;
 const clamp = THREE.MathUtils.clamp;
@@ -734,17 +757,66 @@ goalCore.rotation.x = -HALF_PI;
 goalBeacon.add(goalRing, goalCore);
 scene.add(goalBeacon);
 let chapterGoal = null;
+let activeSigils = [];
 function updateGoalBeacon(t = simTime) {
   if (!chapterGoal || state.phase === 'ending') { goalBeacon.visible = false; return; }
   goalBeacon.visible = true;
   goalBeacon.position.set(chapterGoal.pos.x, chapterGoal.pos.y + 0.065 + Math.sin(t * 2.4) * 0.018, chapterGoal.pos.z);
   const s = 1 + Math.sin(t * 3.1) * 0.08;
   goalRing.scale.setScalar(s);
-  goalRing.material.opacity = 0.68 + Math.sin(t * 2.2) * 0.16;
-  goalCore.material.opacity = 0.34 + Math.sin(t * 2.8) * 0.09;
+  const ready = activeSigils.every(sigil => sigil.collected);
+  goalRing.material.color.set(ready ? PAL.goalGlow : 0xc7b6d8);
+  goalCore.material.color.set(ready ? 0xfff5cf : 0xded3ec);
+  goalRing.material.opacity = (ready ? 0.68 : 0.34) + Math.sin(t * 2.2) * 0.12;
+  goalCore.material.opacity = (ready ? 0.34 : 0.16) + Math.sin(t * 2.8) * 0.06;
 }
 function isChapterGoal(n) {
   return n && n === chapterGoal;
+}
+function chapterGoalReady() {
+  return activeSigils.every(sigil => sigil.collected);
+}
+
+const sigilMat = new THREE.MeshBasicMaterial({ color: 0xfff3c1, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
+const sigilCoreMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.54, depthWrite: false, toneMapped: false });
+const sigilMeshes = Array.from({ length: 3 }, () => {
+  const group = new THREE.Group();
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.24, 32), sigilMat.clone());
+  ring.rotation.x = -HALF_PI;
+  const core = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), sigilCoreMat.clone());
+  core.rotation.x = -HALF_PI;
+  group.add(ring, core);
+  group.visible = false;
+  scene.add(group);
+  return { group, ring, core };
+});
+function setupSigils(ch) {
+  activeSigils = (ch.sigils || []).map((id, i) => ({ id, node: byId(id), collected: false, mesh: sigilMeshes[i] })).filter(sigil => sigil.node && sigil.mesh);
+  sigilMeshes.forEach((mesh, i) => { mesh.group.visible = i < activeSigils.length; });
+  updateSigils();
+}
+function updateSigils(t = simTime) {
+  sigilMeshes.forEach(mesh => { mesh.group.visible = false; });
+  activeSigils.forEach((sigil, i) => {
+    const mesh = sigil.mesh;
+    mesh.group.visible = !sigil.collected && state.phase !== 'ending';
+    if (!mesh.group.visible) return;
+    mesh.group.position.set(sigil.node.pos.x, sigil.node.pos.y + 0.12 + Math.sin(t * 3 + i) * 0.04, sigil.node.pos.z);
+    const scale = 1 + Math.sin(t * 4.1 + i * 0.7) * 0.1;
+    mesh.ring.scale.setScalar(scale);
+    mesh.ring.material.opacity = 0.72 + Math.sin(t * 3.5 + i) * 0.16;
+    mesh.core.material.opacity = 0.42 + Math.sin(t * 4.2 + i) * 0.12;
+  });
+}
+function collectSigil(n) {
+  const sigil = activeSigils.find(s => s.node === n && !s.collected);
+  if (!sigil) return;
+  sigil.collected = true;
+  sigil.mesh.group.visible = false;
+  const left = activeSigils.filter(s => !s.collected).length;
+  tone(880 + activeSigils.indexOf(sigil) * 120, 0, 0.22, 0.035, 'triangle');
+  showToast(left ? `光印 ${activeSigils.length - left}/${activeSigils.length}` : '金色光环已打开');
+  updateHud();
 }
 
 // ---------------------------------------------------------------- state / tweens
@@ -798,7 +870,12 @@ function doTeleport(n) {
     walker.node = pair;
     char.position.copy(pair.pos);
     state.teleporting = false;
-    if (isChapterGoal(pair)) { win(); return; }
+    collectSigil(pair);
+    if (isChapterGoal(pair)) {
+      if (chapterGoalReady()) win();
+      else showToast('还差光印');
+      return;
+    }
     const nb = adj.get(pair.id)[0];
     if (nb) startWalk(nb, false);     // step out of the door, fading back in
   });
@@ -825,7 +902,13 @@ function stepWalker(dt) {
   if (walker.t >= 1) {
     walker.seg++; walker.node = b; walker.t = 0;
     char.position.copy(b.pos);
-    if (b.goal || isChapterGoal(b)) { walker.path = []; win(); return; }
+    collectSigil(b);
+    if (isChapterGoal(b)) {
+      walker.path = [];
+      if (chapterGoalReady()) win();
+      else showToast('还差光印');
+      return;
+    }
     if (b.portal) { walker.path = []; doTeleport(b); return; }
     if (walker.seg >= walker.path.length - 1) {
       walker.path = [];
@@ -969,7 +1052,9 @@ function updateHud() {
   hud.querySelector('.num').textContent = `${chapterNo(chapterIndex)} / ${CHAPTERS.length}`;
   hud.querySelector('.fill').style.width = `${((chapterIndex + 1) / CHAPTERS.length) * 100}%`;
   hud.querySelector('.name').textContent = ch.name;
-  hud.querySelector('.task').textContent = ch.task;
+  const collected = activeSigils.filter(sigil => sigil.collected).length;
+  const sigilText = activeSigils.length ? ` · 光印 ${collected}/${activeSigils.length}` : '';
+  hud.querySelector('.task').textContent = `${ch.task}${sigilText}`;
 }
 function buildChapterMap() {
   const map = $('chapterMap');
@@ -1017,6 +1102,7 @@ function startChapter(i, opts = {}) {
   resetRotor(dials[1], ch.r2 || 0);
   updateGraph();
   chapterGoal = byId(ch.goal) || byId('goal');
+  setupSigils(ch);
 
   const start = byId(ch.start) || startNode;
   if (char.parent !== scene) scene.attach(char);
@@ -1205,6 +1291,7 @@ function step(dt) {
     }
   }
   updateGoalBeacon(t);
+  updateSigils(t);
   if (state.phase !== 'intro') {
     view.panX = lerp(view.panX, mouseN.x * 0.45, dt * 2.5);
     view.panY = lerp(view.panY, -mouseN.y * 0.28, dt * 2.5);
