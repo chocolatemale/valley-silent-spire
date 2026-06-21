@@ -1192,6 +1192,9 @@ function ratingForMoves(moves, par) {
 function ratingText(rating) {
   return rating === 3 ? '完美光路' : rating === 2 ? '清亮光路' : '抵达光路';
 }
+function totalStars() {
+  return CHAPTERS.reduce((sum, _, i) => sum + (bestRatings[i] || 0), 0);
+}
 function recordMove() {
   chapterMoves++;
   updateHud();
@@ -1208,9 +1211,10 @@ function updateEndStats(rating, completedMoves) {
   $('statRules').textContent = ruleProgressText().replaceAll('✓', '').replaceAll('○', '') || '无';
   $('statMoves').textContent = `${completedMoves}/${ch.par}`;
   const next = chapterIndex < CHAPTERS.length - 1 ? CHAPTERS[chapterIndex + 1] : CHAPTERS[0];
+  const stars = `${totalStars()}/${CHAPTERS.length * 3}`;
   $('nextHint').textContent = chapterIndex < CHAPTERS.length - 1
-    ? `${ratingText(rating)} · 下一章 ${next.theme.name} / ${next.name}`
-    : `${ratingText(rating)} · 二十章已点亮`;
+    ? `${ratingText(rating)} · 星光 ${stars} · 下一章 ${next.theme.name} / ${next.name}`
+    : `${ratingText(rating)} · 星光 ${stars} · 二十章已点亮`;
 }
 function updateHud() {
   const ch = CHAPTERS[chapterIndex];
@@ -1348,6 +1352,7 @@ $('again').onclick = () => {
   if (chapterIndex >= CHAPTERS.length - 1) startChapter(0);
   else startChapter(chapterIndex + 1);
 };
+$('retry').onclick = () => startChapter(chapterIndex);
 setTimeout(() => { $('veil').style.opacity = '0'; }, 80);
 
 function stepIntro(dt) {
