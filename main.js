@@ -847,6 +847,59 @@ function markRule(key) {
   ruleState[key] = true;
   showToast(`${RULE_LABELS[key]}点亮`);
   updateHud();
+  updateMechanicBeacons();
+}
+
+const mechanicColors = {
+  dial0: PAL.accent,
+  dial1: PAL.rose,
+  portal: PAL.doorGlow,
+  ride: PAL.goalGlow,
+};
+const mechanicBeacons = Object.fromEntries(Object.keys(RULE_LABELS).map(key => {
+  const group = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.24, 0.34, 36),
+    new THREE.MeshBasicMaterial({ color: mechanicColors[key], transparent: true, opacity: 0.82, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+  );
+  ring.rotation.x = -HALF_PI;
+  const dot = new THREE.Mesh(
+    new THREE.CircleGeometry(0.08, 24),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.46, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+  );
+  dot.rotation.x = -HALF_PI;
+  group.add(ring, dot);
+  group.visible = false;
+  scene.add(group);
+  return [key, { group, ring, dot }];
+}));
+const _anchor = new THREE.Vector3();
+function mechanicAnchor(key) {
+  if (key === 'dial0') return _anchor.copy(dials[0].group.position).setY(dials[0].group.position.y + 0.62);
+  if (key === 'dial1') return _anchor.copy(dials[1].group.position).setY(dials[1].group.position.y + 0.62);
+  if (key === 'portal') return _anchor.copy(byId('pLow').pos).setY(byId('pLow').pos.y + 0.18);
+  if (key === 'ride') {
+    const rules = CHAPTERS[chapterIndex]?.rules || {};
+    const node = rules.dial1 && !rules.dial0 ? byId('r2s') : byId('r2');
+    return _anchor.copy(node.pos).setY(node.pos.y + 0.18);
+  }
+  return _anchor.set(0, -999, 0);
+}
+function updateMechanicBeacons(t = simTime) {
+  const rules = CHAPTERS[chapterIndex]?.rules || {};
+  for (const key of Object.keys(mechanicBeacons)) {
+    const beacon = mechanicBeacons[key];
+    const active = !!rules[key] && !ruleState[key] && state.phase !== 'ending';
+    beacon.group.visible = active;
+    if (!active) continue;
+    beacon.group.position.copy(mechanicAnchor(key));
+    beacon.group.position.y += Math.sin(t * 3.2 + key.length) * 0.035;
+    const s = 1 + Math.sin(t * 4.4 + key.length) * 0.11;
+    beacon.ring.scale.setScalar(s);
+    beacon.ring.material.color.set(mechanicColors[key]);
+    beacon.ring.material.opacity = 0.58 + Math.sin(t * 3.4 + key.length) * 0.18;
+    beacon.dot.material.opacity = 0.28 + Math.sin(t * 4.1 + key.length) * 0.12;
+  }
 }
 
 const sigilMat = new THREE.MeshBasicMaterial({ color: 0xfff3c1, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
@@ -1265,6 +1318,7 @@ function startChapter(i, opts = {}) {
   updateHud();
   updateChapterMap();
   updateGoalBeacon();
+  updateMechanicBeacons();
   if (!opts.intro) {
     showToast(`${ch.theme.name} · ${ch.theme.note}`);
     setTimeout(() => { $('hint').style.opacity = '0'; }, 4200);
@@ -1414,6 +1468,7 @@ function step(dt) {
   }
   updateGoalBeacon(t);
   updateSigils(t);
+  updateMechanicBeacons(t);
   if (state.phase !== 'intro') {
     view.panX = lerp(view.panX, mouseN.x * 0.45, dt * 2.5);
     view.panY = lerp(view.panY, -mouseN.y * 0.28, dt * 2.5);
