@@ -81,7 +81,8 @@ const CHAPTER_SIGILS = [
   ['n2_0_0', 'pLow', 'n-5_5_-5'],
   ['n4_0_0', 'pLow', 'n-3_5_-5'],
 ];
-CHAPTERS.forEach((ch, i) => { ch.sigils = CHAPTER_SIGILS[i]; });
+const CHAPTER_PARS = [1, 2, 2, 3, 3, 3, 5, 3, 2, 3, 4, 4, 3, 3, 2, 3, 2, 5, 8, 10];
+CHAPTERS.forEach((ch, i) => { ch.sigils = CHAPTER_SIGILS[i]; ch.par = CHAPTER_PARS[i]; });
 
 const deg = THREE.MathUtils.degToRad;
 const clamp = THREE.MathUtils.clamp;
@@ -857,7 +858,7 @@ function startWalk(target, click) {
   const p = findPath(walker.node, target);
   if (!p) { showMarker(target.pos, false); return; }
   walker.path = p; walker.seg = 0; walker.t = 0;
-  if (click) { showMarker(target.pos, true); sfx.walk(); }
+  if (click) { recordMove(); showMarker(target.pos, true); sfx.walk(); }
 }
 
 function doTeleport(n) {
@@ -928,8 +929,9 @@ function stepWalker(dt) {
 // ---------------------------------------------------------------- rotation
 function tapDial(i) {
   if (state.phase !== 'play' || busy()) return;
-  if (walker.path.length) { walker.pendingDial = i; return; }
+  if (walker.path.length) { walker.pendingDial = i; recordMove(); return; }
   const dl = dials[i];
+  recordMove();
   state.rotating = true;
   dl.used = true;
   sfx.dial();
@@ -1034,12 +1036,36 @@ function readStoredChapter(key) {
 let chapterIndex = readStoredChapter('valley.chapter');
 let bestChapter = readStoredChapter('valley.bestChapter');
 bestChapter = Math.max(bestChapter, chapterIndex);
+function readJsonRecord(key, fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || 'null');
+    return value && typeof value === 'object' ? value : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+const bestMoves = readJsonRecord('valley.bestMoves', {});
+const bestRatings = readJsonRecord('valley.bestRatings', {});
+let chapterMoves = 0;
 
 function chapterNo(i) {
   return String(i + 1).padStart(2, '0');
 }
 function chapterTitle(i) {
   return `第 ${chapterNo(i)} 章`;
+}
+function ratingForMoves(moves, par) {
+  if (!moves) return 0;
+  if (moves <= par) return 3;
+  if (moves <= par + 2) return 2;
+  return 1;
+}
+function ratingText(rating) {
+  return rating === 3 ? '完美光路' : rating === 2 ? '清亮光路' : '抵达光路';
+}
+function recordMove() {
+  chapterMoves++;
+  updateHud();
 }
 function setOverlayText(el, big, small, button) {
   el.querySelector('.big').textContent = big;
@@ -1054,7 +1080,8 @@ function updateHud() {
   hud.querySelector('.name').textContent = ch.name;
   const collected = activeSigils.filter(sigil => sigil.collected).length;
   const sigilText = activeSigils.length ? ` · 光印 ${collected}/${activeSigils.length}` : '';
-  hud.querySelector('.task').textContent = `${ch.task}${sigilText}`;
+  const best = bestMoves[chapterIndex] ? ` · 最佳 ${bestMoves[chapterIndex]}` : '';
+  hud.querySelector('.task').textContent = `${ch.task}${sigilText} · 操作 ${chapterMoves}/${ch.par}${best}`;
 }
 function buildChapterMap() {
   const map = $('chapterMap');
@@ -1077,6 +1104,8 @@ function updateChapterMap() {
     dot.className = '';
     if (i <= bestChapter) dot.classList.add('done');
     else dot.classList.add('locked');
+    if (bestRatings[i] >= 2) dot.classList.add('good');
+    if (bestRatings[i] >= 3) dot.classList.add('perfect');
     if (i === chapterIndex) dot.classList.add('current');
   });
 }
@@ -1098,6 +1127,7 @@ function startChapter(i, opts = {}) {
   chapterIndex = (i + CHAPTERS.length) % CHAPTERS.length;
   localStorage.setItem('valley.chapter', String(chapterIndex));
   const ch = CHAPTERS[chapterIndex];
+  chapterMoves = 0;
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
   updateGraph();
@@ -1197,6 +1227,17 @@ function stepIntro(dt) {
 
 function win() {
   state.phase = 'ending';
+  const ch = CHAPTERS[chapterIndex];
+  const completedMoves = Math.max(1, chapterMoves);
+  const rating = ratingForMoves(completedMoves, ch.par);
+  if (!bestMoves[chapterIndex] || completedMoves < bestMoves[chapterIndex]) {
+    bestMoves[chapterIndex] = completedMoves;
+    localStorage.setItem('valley.bestMoves', JSON.stringify(bestMoves));
+  }
+  if (!bestRatings[chapterIndex] || rating > bestRatings[chapterIndex]) {
+    bestRatings[chapterIndex] = rating;
+    localStorage.setItem('valley.bestRatings', JSON.stringify(bestRatings));
+  }
   bestChapter = Math.max(bestChapter, Math.min(chapterIndex + 1, CHAPTERS.length - 1));
   localStorage.setItem('valley.bestChapter', String(bestChapter));
   updateChapterMap();
@@ -1209,12 +1250,13 @@ function win() {
   tween(0.9, k => { shrineLight.intensity = 12 + k * 34; });
   setTimeout(() => {
     const e = $('end');
+    const scoreLine = `${ratingText(rating)} · 操作 ${completedMoves}/${ch.par} · 最佳 ${bestMoves[chapterIndex]}`;
     if (chapterIndex >= CHAPTERS.length - 1) {
-      setOverlayText(e, '二 十 章', '所有光路都已被点亮', '重 游 第一章');
+      setOverlayText(e, '二 十 章', `所有光路都已被点亮 · ${scoreLine}`, '重 游 第一章');
       showToast('二十章完成');
     } else {
       const next = CHAPTERS[chapterIndex + 1];
-      setOverlayText(e, `${chapterTitle(chapterIndex)} 完成`, `下一章 · ${next.name} · ${next.en}`, '下 一 章');
+      setOverlayText(e, `${chapterTitle(chapterIndex)} 完成`, `${scoreLine} · 下一章 ${next.name}`, '下 一 章');
     }
     e.style.opacity = '1';
     e.classList.add('show');
@@ -1318,7 +1360,14 @@ window.game = {
   walkTo: id => { const n = byId(id); if (n) requestWalk(n); },
   tapDial,
   startChapter,
-  chapter: () => ({ index: chapterIndex, best: bestChapter, data: CHAPTERS[chapterIndex] }),
+  chapter: () => ({ index: chapterIndex, best: bestChapter, moves: chapterMoves, bestMoves, bestRatings, data: CHAPTERS[chapterIndex] }),
+  resetProgress: () => {
+    localStorage.removeItem('valley.chapter');
+    localStorage.removeItem('valley.bestChapter');
+    localStorage.removeItem('valley.bestMoves');
+    localStorage.removeItem('valley.bestRatings');
+    location.reload();
+  },
   skipIntro: () => { intro.skip = true; },
   adj: () => adj,
 };
