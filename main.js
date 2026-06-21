@@ -1201,6 +1201,17 @@ function setOverlayText(el, big, small, button) {
   el.querySelector('.small').textContent = small;
   $('again').textContent = button;
 }
+function updateEndStats(rating, completedMoves) {
+  const ch = CHAPTERS[chapterIndex];
+  const collected = activeSigils.filter(sigil => sigil.collected).length;
+  $('statSigils').textContent = `${collected}/${activeSigils.length}`;
+  $('statRules').textContent = ruleProgressText().replaceAll('✓', '').replaceAll('○', '') || '无';
+  $('statMoves').textContent = `${completedMoves}/${ch.par}`;
+  const next = chapterIndex < CHAPTERS.length - 1 ? CHAPTERS[chapterIndex + 1] : CHAPTERS[0];
+  $('nextHint').textContent = chapterIndex < CHAPTERS.length - 1
+    ? `${ratingText(rating)} · 下一章 ${next.theme.name} / ${next.name}`
+    : `${ratingText(rating)} · 二十章已点亮`;
+}
 function updateHud() {
   const ch = CHAPTERS[chapterIndex];
   const hud = $('chapterHud');
@@ -1384,13 +1395,13 @@ function win() {
   tween(0.9, k => { shrineLight.intensity = 12 + k * 34; });
   setTimeout(() => {
     const e = $('end');
-    const scoreLine = `${ratingText(rating)} · 操作 ${completedMoves}/${ch.par} · 最佳 ${bestMoves[chapterIndex]}`;
+    updateEndStats(rating, completedMoves);
     if (chapterIndex >= CHAPTERS.length - 1) {
-      setOverlayText(e, '二 十 章', `所有光路都已被点亮 · ${scoreLine}`, '重 游 第一章');
+      setOverlayText(e, '二 十 章', '所有光路都已被点亮', '重 游 第一章');
       showToast('二十章完成');
     } else {
       const next = CHAPTERS[chapterIndex + 1];
-      setOverlayText(e, `${chapterTitle(chapterIndex)} 完成`, `${scoreLine} · 下一章 ${next.name}`, '下 一 章');
+      setOverlayText(e, `${chapterTitle(chapterIndex)} 完成`, `${ch.name} · ${next.en}`, '下 一 章');
     }
     e.style.opacity = '1';
     e.classList.add('show');
