@@ -37,6 +37,29 @@ const GRAD_LO = -13, GRAD_HI = 10;
 const HALF_PI = Math.PI / 2;
 const USE_GTAO = true;
 
+const CHAPTERS = [
+  { name: '寂静尖塔', en: 'THE SILENT SPIRE', start: 'n7_0_0', r1: 0, r2: 1, upper: false, task: '学会行走,唤醒青色长桥', target: [-1.4, 3.2, -1.8], zoom: 1 },
+  { name: '风从东门来', en: 'EAST WIND GATE', start: 'n6_0_1', r1: 1, r2: 1, upper: false, task: '从错开的起点找回主塔道路', target: [-1.8, 3.3, -1.5], zoom: 1.04 },
+  { name: '低桥回声', en: 'LOW BRIDGE ECHO', start: 'n4_0_0', r1: 1, r2: 0, upper: false, task: '用一次旋转把桥接回塔身', target: [-2.2, 3.1, -1.4], zoom: 1.08 },
+  { name: '主塔广场', en: 'PLAZA OF KEYS', start: 'n2_0_0', r1: 2, r2: 1, upper: false, task: '从广场辨认哪座转盘会改变远方', target: [-2.4, 3.2, -1.8], zoom: 1.08 },
+  { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', r1: 0, r2: 2, upper: false, task: '登上西侧楼梯,寻找桥的入口', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
+  { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', r1: 1, r2: 3, upper: false, task: '站在高处,让长桥转向你', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
+  { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', r1: 2, r2: 1, upper: false, task: '用桥载着自己跨过空海', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
+  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', r1: 0, r2: 0, upper: false, task: '从旋转件中央判断下一次转向', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
+  { name: '蓝绿门槛', en: 'TEAL THRESHOLD', start: 'n-8_4_-3', r1: 3, r2: 1, upper: false, task: '进入孪生门,记住出口的高度', target: [-7.2, 5.1, -4.1], zoom: 1.18 },
+  { name: '高空回廊', en: 'HIGH CATWALK', start: 'pUp', r1: 0, r2: 1, upper: true, task: '从高处回廊寻找玫瑰机关', target: [-4.3, 5.4, -4.7], zoom: 1.16 },
+  { name: '玫瑰转盘', en: 'ROSE DIAL', start: 'n-6_5_-5', r1: 2, r2: 2, upper: true, task: '转动玫瑰楼梯,让高度对齐', target: [-3.8, 5.4, -5.1], zoom: 1.18 },
+  { name: '断阶练习', en: 'BROKEN STAIR', start: 'n-4_5_-5', r1: 1, r2: 3, upper: true, task: '在错位前停下,先改变楼梯朝向', target: [-2.8, 5.5, -5.1], zoom: 1.22 },
+  { name: '半空台阶', en: 'MID-AIR RISER', start: 'r2s', r1: 0, r2: 0, upper: true, task: '站在楼梯上旋转,让脚下空间移动', target: [-1.7, 5.8, -5.1], zoom: 1.24 },
+  { name: '峰顶边缘', en: 'SUMMIT EDGE', start: 'r2l', r1: 3, r2: 1, upper: true, task: '从移动落点进入峰顶平台', target: [-0.2, 6.1, -5.1], zoom: 1.22 },
+  { name: '双塔影子', en: 'TWIN TOWER SHADOW', start: 'n0_6_-5', r1: 2, r2: 2, upper: true, task: '从峰顶回望两座塔,找到金门方向', target: [0.1, 6.1, -5.4], zoom: 1.18 },
+  { name: '树下短暂停留', en: 'UNDER THE TREE', start: 'n1_6_-4', r1: 0, r2: 3, upper: true, task: '绕过树影,走向最后一列平台', target: [0.8, 6.2, -5.2], zoom: 1.2 },
+  { name: '金色门廊', en: 'GOLDEN PORTICO', start: 'n2_6_-5', r1: 1, r2: 0, upper: true, task: '靠近神龛,别被近路迷惑', target: [1.1, 6.5, -5.7], zoom: 1.2 },
+  { name: '回旋试炼', en: 'SPIRAL TRIAL', start: 'n-5_4_-1', r1: 3, r2: 3, upper: false, task: '从旧路重走,但两个机关都已错位', target: [-4.8, 4.2, -2.8], zoom: 1.13 },
+  { name: '云海长线', en: 'CLOUDLINE RUN', start: 'n6_0_-1', r1: 2, r2: 0, upper: false, task: '一口气串起低桥、传送门与悬空阶', target: [-2.2, 3.7, -2.6], zoom: 1.02 },
+  { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', r1: 3, r2: 2, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
+];
+
 const deg = THREE.MathUtils.degToRad;
 const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
@@ -893,6 +916,108 @@ composer.addPass(gradePass);
 
 // ---------------------------------------------------------------- intro / ending
 const $ = id => document.getElementById(id);
+function readStoredChapter(key) {
+  const v = Number(localStorage.getItem(key) || 0);
+  return Number.isFinite(v) ? clamp(v, 0, CHAPTERS.length - 1) : 0;
+}
+let chapterIndex = readStoredChapter('valley.chapter');
+let bestChapter = readStoredChapter('valley.bestChapter');
+
+function chapterNo(i) {
+  return String(i + 1).padStart(2, '0');
+}
+function chapterTitle(i) {
+  return `第 ${chapterNo(i)} 章`;
+}
+function setOverlayText(el, big, small, button) {
+  el.querySelector('.big').textContent = big;
+  el.querySelector('.small').textContent = small;
+  $('again').textContent = button;
+}
+function updateHud() {
+  const ch = CHAPTERS[chapterIndex];
+  const hud = $('chapterHud');
+  hud.querySelector('.num').textContent = `${chapterNo(chapterIndex)} / ${CHAPTERS.length}`;
+  hud.querySelector('.fill').style.width = `${((chapterIndex + 1) / CHAPTERS.length) * 100}%`;
+  hud.querySelector('.name').textContent = ch.name;
+  hud.querySelector('.task').textContent = ch.task;
+}
+function showToast(text) {
+  const toast = $('chapterToast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove('show'), 2300);
+}
+function resetRotor(dl, quarterTurn) {
+  dl.angle = quarterTurn * HALF_PI;
+  dl.rotor.rotation.y = dl.angle;
+  dl.drum.rotation.y = -dl.angle * 2;
+  dl.used = false;
+  dl.halo.material.opacity = 0;
+}
+function startChapter(i, opts = {}) {
+  chapterIndex = (i + CHAPTERS.length) % CHAPTERS.length;
+  localStorage.setItem('valley.chapter', String(chapterIndex));
+  const ch = CHAPTERS[chapterIndex];
+  resetRotor(dials[0], ch.r1 || 0);
+  resetRotor(dials[1], ch.r2 || 0);
+  updateGraph();
+
+  const start = byId(ch.start) || startNode;
+  if (char.parent !== scene) scene.attach(char);
+  walker.node = start;
+  walker.path = [];
+  walker.seg = 0;
+  walker.t = 0;
+  walker.pending = null;
+  walker.pendingDial = null;
+  walker.phase = 0;
+  char.position.copy(start.pos);
+  char.rotation.set(0, Math.atan2(-1, 0), 0);
+  charBody.position.set(0, 0, 0);
+  charBody.rotation.set(0, 0, 0);
+  charMat.opacity = 1;
+  markerAnim = null;
+  marker.material.opacity = 0;
+
+  state.phase = opts.intro ? 'intro' : 'play';
+  state.rotating = false;
+  state.teleporting = false;
+  state.upperReached = !!ch.upper;
+  bloom.strength = 0.27;
+  shrineLight.intensity = 12;
+  doorLight.intensity = 14;
+
+  view.az = deg(45);
+  view.el = deg(32);
+  view.zoom = ch.zoom || 1;
+  view.target.set(ch.target[0], ch.target[1], ch.target[2]);
+  view.panX = 0;
+  view.panY = 0;
+  FINAL_TARGET.copy(view.target);
+
+  intro.t = 0;
+  intro.skip = false;
+  intro.titleShown = false;
+  intro.titleHidden = false;
+  intro.toTarget.copy(view.target);
+  intro.fromTarget.set(ch.target[0] - 5, ch.target[1] + 3, ch.target[2] - 3);
+  $('title').style.opacity = '0';
+  $('hint').style.opacity = opts.intro ? '0' : '1';
+  $('chapterHud').classList.toggle('show', !opts.intro);
+  const end = $('end');
+  end.style.opacity = '0';
+  end.classList.remove('show');
+  setOverlayText($('title'), 'V A L L E Y', `${chapterTitle(chapterIndex)} · ${ch.name}`, '下一章');
+  setOverlayText(end, chapterTitle(chapterIndex), `${ch.name} · ${ch.en}`, chapterIndex === CHAPTERS.length - 1 ? '重 游 第一章' : '下 一 章');
+  updateHud();
+  if (!opts.intro) {
+    showToast(`${chapterTitle(chapterIndex)} · ${ch.name}`);
+    setTimeout(() => { $('hint').style.opacity = '0'; }, 4200);
+  }
+}
+
 const intro = {
   t: 0, dur: 8, skip: false, titleShown: false, titleHidden: false,
   fromAz: deg(74), toAz: deg(45),
@@ -900,6 +1025,10 @@ const intro = {
   fromZoom: 1.6, toZoom: 1.0,
   fromTarget: new THREE.Vector3(-6.4, 6.2, -4.6),
   toTarget: FINAL_TARGET.clone(),
+};
+$('again').onclick = () => {
+  if (chapterIndex >= CHAPTERS.length - 1) startChapter(0);
+  else startChapter(chapterIndex + 1);
 };
 setTimeout(() => { $('veil').style.opacity = '0'; }, 80);
 
@@ -915,6 +1044,7 @@ function stepIntro(dt) {
   if (!intro.titleHidden && k > 0.72) { intro.titleHidden = true; $('title').style.opacity = '0'; }
   if (k >= 1) {
     state.phase = 'play';
+    $('chapterHud').classList.add('show');
     $('hint').style.opacity = '1';
     setTimeout(() => { $('hint').style.opacity = '0'; }, 9000);
   }
@@ -922,6 +1052,8 @@ function stepIntro(dt) {
 
 function win() {
   state.phase = 'ending';
+  bestChapter = Math.max(bestChapter, chapterIndex);
+  localStorage.setItem('valley.bestChapter', String(bestChapter));
   document.body.style.cursor = 'default';
   $('hint').style.opacity = '0';
   sfx.win();
@@ -929,7 +1061,18 @@ function win() {
     tween(2.5, k => { bloom.strength = 1.22 - k * 0.74; });
   });
   tween(0.9, k => { shrineLight.intensity = 12 + k * 34; });
-  setTimeout(() => { const e = $('end'); e.style.opacity = '1'; e.classList.add('show'); }, 1600);
+  setTimeout(() => {
+    const e = $('end');
+    if (chapterIndex >= CHAPTERS.length - 1) {
+      setOverlayText(e, '二 十 章', '所有光路都已被点亮', '重 游 第一章');
+      showToast('二十章完成');
+    } else {
+      const next = CHAPTERS[chapterIndex + 1];
+      setOverlayText(e, `${chapterTitle(chapterIndex)} 完成`, `下一章 · ${next.name} · ${next.en}`, '下 一 章');
+    }
+    e.style.opacity = '1';
+    e.classList.add('show');
+  }, 1600);
   const az0 = view.az, el0 = view.el, z0 = view.zoom;
   const t0 = view.target.clone(), t1 = new THREE.Vector3(-1.8, 3.7, -2.2);
   tween(9, k => {
@@ -1018,11 +1161,15 @@ addEventListener('resize', () => {
   applyCamera();
 });
 
+startChapter(chapterIndex, { intro: true });
+
 // ---------------------------------------------------------------- debug api
 window.game = {
-  state, view, nodes, walker, intro, bloom, gtao, sun, moon, step, cam, dials,
+  state, view, nodes, walker, intro, bloom, gtao, sun, moon, step, cam, dials, CHAPTERS,
   walkTo: id => { const n = byId(id); if (n) requestWalk(n); },
   tapDial,
+  startChapter,
+  chapter: () => ({ index: chapterIndex, best: bestChapter, data: CHAPTERS[chapterIndex] }),
   skipIntro: () => { intro.skip = true; },
   adj: () => adj,
 };
