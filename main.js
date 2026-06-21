@@ -38,26 +38,26 @@ const HALF_PI = Math.PI / 2;
 const USE_GTAO = true;
 
 const CHAPTERS = [
-  { name: '寂静尖塔', en: 'THE SILENT SPIRE', start: 'n7_0_0', r1: 0, r2: 1, upper: false, task: '学会行走,唤醒青色长桥', target: [-1.4, 3.2, -1.8], zoom: 1 },
-  { name: '风从东门来', en: 'EAST WIND GATE', start: 'n6_0_1', r1: 1, r2: 1, upper: false, task: '从错开的起点找回主塔道路', target: [-1.8, 3.3, -1.5], zoom: 1.04 },
-  { name: '低桥回声', en: 'LOW BRIDGE ECHO', start: 'n4_0_0', r1: 1, r2: 0, upper: false, task: '用一次旋转把桥接回塔身', target: [-2.2, 3.1, -1.4], zoom: 1.08 },
-  { name: '主塔广场', en: 'PLAZA OF KEYS', start: 'n2_0_0', r1: 2, r2: 1, upper: false, task: '从广场辨认哪座转盘会改变远方', target: [-2.4, 3.2, -1.8], zoom: 1.08 },
-  { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', r1: 0, r2: 2, upper: false, task: '登上西侧楼梯,寻找桥的入口', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
-  { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', r1: 1, r2: 3, upper: false, task: '站在高处,让长桥转向你', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
-  { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', r1: 2, r2: 1, upper: false, task: '用桥载着自己跨过空海', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
-  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', r1: 0, r2: 0, upper: false, task: '从旋转件中央判断下一次转向', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
-  { name: '蓝绿门槛', en: 'TEAL THRESHOLD', start: 'n-8_4_-3', r1: 3, r2: 1, upper: false, task: '进入孪生门,记住出口的高度', target: [-7.2, 5.1, -4.1], zoom: 1.18 },
-  { name: '高空回廊', en: 'HIGH CATWALK', start: 'pUp', r1: 0, r2: 1, upper: true, task: '从高处回廊寻找玫瑰机关', target: [-4.3, 5.4, -4.7], zoom: 1.16 },
-  { name: '玫瑰转盘', en: 'ROSE DIAL', start: 'n-6_5_-5', r1: 2, r2: 2, upper: true, task: '转动玫瑰楼梯,让高度对齐', target: [-3.8, 5.4, -5.1], zoom: 1.18 },
-  { name: '断阶练习', en: 'BROKEN STAIR', start: 'n-4_5_-5', r1: 1, r2: 3, upper: true, task: '在错位前停下,先改变楼梯朝向', target: [-2.8, 5.5, -5.1], zoom: 1.22 },
-  { name: '半空台阶', en: 'MID-AIR RISER', start: 'r2s', r1: 0, r2: 0, upper: true, task: '站在楼梯上旋转,让脚下空间移动', target: [-1.7, 5.8, -5.1], zoom: 1.24 },
-  { name: '峰顶边缘', en: 'SUMMIT EDGE', start: 'r2l', r1: 3, r2: 1, upper: true, task: '从移动落点进入峰顶平台', target: [-0.2, 6.1, -5.1], zoom: 1.22 },
-  { name: '双塔影子', en: 'TWIN TOWER SHADOW', start: 'n0_6_-5', r1: 2, r2: 2, upper: true, task: '从峰顶回望两座塔,找到金门方向', target: [0.1, 6.1, -5.4], zoom: 1.18 },
-  { name: '树下短暂停留', en: 'UNDER THE TREE', start: 'n1_6_-4', r1: 0, r2: 3, upper: true, task: '绕过树影,走向最后一列平台', target: [0.8, 6.2, -5.2], zoom: 1.2 },
-  { name: '金色门廊', en: 'GOLDEN PORTICO', start: 'n2_6_-5', r1: 1, r2: 0, upper: true, task: '靠近神龛,别被近路迷惑', target: [1.1, 6.5, -5.7], zoom: 1.2 },
-  { name: '回旋试炼', en: 'SPIRAL TRIAL', start: 'n-5_4_-1', r1: 3, r2: 3, upper: false, task: '从旧路重走,但两个机关都已错位', target: [-4.8, 4.2, -2.8], zoom: 1.13 },
-  { name: '云海长线', en: 'CLOUDLINE RUN', start: 'n6_0_-1', r1: 2, r2: 0, upper: false, task: '一口气串起低桥、传送门与悬空阶', target: [-2.2, 3.7, -2.6], zoom: 1.02 },
-  { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', r1: 3, r2: 2, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
+  { name: '寂静尖塔', en: 'THE SILENT SPIRE', start: 'n7_0_0', goal: 'n4_0_0', r1: 0, r2: 1, upper: false, task: '走过第一段低桥,抵达金色光环', target: [-1.4, 3.2, -1.8], zoom: 1 },
+  { name: '风从东门来', en: 'EAST WIND GATE', start: 'n6_0_1', goal: 'n2_0_0', r1: 1, r2: 1, upper: false, task: '从错开的起点找回主塔广场', target: [-1.8, 3.3, -1.5], zoom: 1.04 },
+  { name: '低桥回声', en: 'LOW BRIDGE ECHO', start: 'n4_0_0', goal: 'n-1_1.5_0', r1: 1, r2: 0, upper: false, task: '沿白色阶梯向上,抵达第二级台阶', target: [-2.2, 3.1, -1.4], zoom: 1.08 },
+  { name: '主塔广场', en: 'PLAZA OF KEYS', start: 'n2_0_0', goal: 'n-3_3.5_0', r1: 2, r2: 1, upper: false, task: '从广场登到西侧高处', target: [-2.4, 3.2, -1.8], zoom: 1.08 },
+  { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', goal: 'n-5_4_0', r1: 0, r2: 2, upper: false, task: '穿过四级白阶,站上西露台中央', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
+  { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', goal: 'r4', r1: 1, r2: 3, upper: false, task: '转动青色长桥,走到桥的入口', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
+  { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', goal: 'n-8_4_-3', r1: 1, r2: 1, upper: false, task: '让长桥载你跨过空海,抵达门塔露台', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
+  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', goal: 'pLow', r1: 0, r2: 0, upper: false, task: '从旋转件中央走进蓝绿门槛', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
+  { name: '蓝绿门槛', en: 'TEAL THRESHOLD', start: 'n-8_4_-3', goal: 'pUp', r1: 0, r2: 1, upper: false, task: '进入孪生门,记住出口的高度', target: [-7.2, 5.1, -4.1], zoom: 1.18 },
+  { name: '高空回廊', en: 'HIGH CATWALK', start: 'pUp', goal: 'n-3_5_-5', r1: 0, r2: 1, upper: true, task: '从高处回廊寻找玫瑰机关', target: [-4.3, 5.4, -4.7], zoom: 1.16 },
+  { name: '玫瑰转盘', en: 'ROSE DIAL', start: 'n-6_5_-5', goal: 'r2s', r1: 2, r2: 1, upper: true, task: '转动玫瑰楼梯,让第一段高度对齐', target: [-3.8, 5.4, -5.1], zoom: 1.18 },
+  { name: '断阶练习', en: 'BROKEN STAIR', start: 'n-4_5_-5', goal: 'r2l', r1: 1, r2: 1, upper: true, task: '在错位前停下,把楼梯转成通路', target: [-2.8, 5.5, -5.1], zoom: 1.22 },
+  { name: '半空台阶', en: 'MID-AIR RISER', start: 'r2s', goal: 'n0_6_-5', r1: 0, r2: 0, upper: true, task: '站在楼梯上旋转,让脚下空间移动', target: [-1.7, 5.8, -5.1], zoom: 1.24 },
+  { name: '峰顶边缘', en: 'SUMMIT EDGE', start: 'r2l', goal: 'n1_6_-5', r1: 3, r2: 0, upper: true, task: '从移动落点进入峰顶平台', target: [-0.2, 6.1, -5.1], zoom: 1.22 },
+  { name: '双塔影子', en: 'TWIN TOWER SHADOW', start: 'n0_6_-5', goal: 'n2_6_-5', r1: 2, r2: 2, upper: true, task: '从峰顶回望两座塔,找到门廊方向', target: [0.1, 6.1, -5.4], zoom: 1.18 },
+  { name: '树下短暂停留', en: 'UNDER THE TREE', start: 'n1_6_-4', goal: 'goal', r1: 0, r2: 3, upper: true, task: '绕过树影,走向神龛金门', target: [0.8, 6.2, -5.2], zoom: 1.2 },
+  { name: '金色门廊', en: 'GOLDEN PORTICO', start: 'n2_6_-5', goal: 'goal', r1: 1, r2: 0, upper: true, task: '靠近神龛,别被近路迷惑', target: [1.1, 6.5, -5.7], zoom: 1.2 },
+  { name: '回旋试炼', en: 'SPIRAL TRIAL', start: 'n-5_4_-1', goal: 'pLow', r1: 1, r2: 1, upper: false, task: '从旧路重走,但要自己骑乘长桥', target: [-4.8, 4.2, -2.8], zoom: 1.13 },
+  { name: '云海长线', en: 'CLOUDLINE RUN', start: 'n6_0_-1', goal: 'n-3_5_-5', r1: 1, r2: 1, upper: false, task: '串起低桥、传送门与高空回廊', target: [-2.2, 3.7, -2.6], zoom: 1.02 },
+  { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', goal: 'goal', r1: 1, r2: 1, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
 ];
 
 const deg = THREE.MathUtils.degToRad;
@@ -720,6 +720,33 @@ function showMarker(pos, ok) {
   markerAnim = { t: 0 };
 }
 
+const goalBeacon = new THREE.Group();
+const goalRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.34, 0.48, 44),
+  new THREE.MeshBasicMaterial({ color: PAL.goalGlow, transparent: true, opacity: 0.82, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }),
+);
+goalRing.rotation.x = -HALF_PI;
+const goalCore = new THREE.Mesh(
+  new THREE.CircleGeometry(0.18, 32),
+  new THREE.MeshBasicMaterial({ color: 0xfff5cf, transparent: true, opacity: 0.42, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }),
+);
+goalCore.rotation.x = -HALF_PI;
+goalBeacon.add(goalRing, goalCore);
+scene.add(goalBeacon);
+let chapterGoal = null;
+function updateGoalBeacon(t = simTime) {
+  if (!chapterGoal || state.phase === 'ending') { goalBeacon.visible = false; return; }
+  goalBeacon.visible = true;
+  goalBeacon.position.set(chapterGoal.pos.x, chapterGoal.pos.y + 0.065 + Math.sin(t * 2.4) * 0.018, chapterGoal.pos.z);
+  const s = 1 + Math.sin(t * 3.1) * 0.08;
+  goalRing.scale.setScalar(s);
+  goalRing.material.opacity = 0.68 + Math.sin(t * 2.2) * 0.16;
+  goalCore.material.opacity = 0.34 + Math.sin(t * 2.8) * 0.09;
+}
+function isChapterGoal(n) {
+  return n && n === chapterGoal;
+}
+
 // ---------------------------------------------------------------- state / tweens
 const state = {
   phase: 'intro',       // intro | play | ending
@@ -771,6 +798,7 @@ function doTeleport(n) {
     walker.node = pair;
     char.position.copy(pair.pos);
     state.teleporting = false;
+    if (isChapterGoal(pair)) { win(); return; }
     const nb = adj.get(pair.id)[0];
     if (nb) startWalk(nb, false);     // step out of the door, fading back in
   });
@@ -797,7 +825,7 @@ function stepWalker(dt) {
   if (walker.t >= 1) {
     walker.seg++; walker.node = b; walker.t = 0;
     char.position.copy(b.pos);
-    if (b.goal) { walker.path = []; win(); return; }
+    if (b.goal || isChapterGoal(b)) { walker.path = []; win(); return; }
     if (b.portal) { walker.path = []; doTeleport(b); return; }
     if (walker.seg >= walker.path.length - 1) {
       walker.path = [];
@@ -963,6 +991,7 @@ function startChapter(i, opts = {}) {
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
   updateGraph();
+  chapterGoal = byId(ch.goal) || byId('goal');
 
   const start = byId(ch.start) || startNode;
   if (char.parent !== scene) scene.attach(char);
@@ -1012,6 +1041,7 @@ function startChapter(i, opts = {}) {
   setOverlayText($('title'), 'V A L L E Y', `${chapterTitle(chapterIndex)} · ${ch.name}`, '下一章');
   setOverlayText(end, chapterTitle(chapterIndex), `${ch.name} · ${ch.en}`, chapterIndex === CHAPTERS.length - 1 ? '重 游 第一章' : '下 一 章');
   updateHud();
+  updateGoalBeacon();
   if (!opts.intro) {
     showToast(`${chapterTitle(chapterIndex)} · ${ch.name}`);
     setTimeout(() => { $('hint').style.opacity = '0'; }, 4200);
@@ -1144,6 +1174,7 @@ function step(dt) {
       marker.scale.setScalar(0.7 + markerAnim.t * 0.9);
     }
   }
+  updateGoalBeacon(t);
   if (state.phase !== 'intro') {
     view.panX = lerp(view.panX, mouseN.x * 0.45, dt * 2.5);
     view.panY = lerp(view.panY, -mouseN.y * 0.28, dt * 2.5);
