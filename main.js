@@ -806,6 +806,7 @@ scene.add(goalBeacon);
 let chapterGoal = null;
 let activeSigils = [];
 let ruleState = { dial0: false, dial1: false, portal: false, ride: false };
+let goalReadyAnnounced = false;
 const RULE_LABELS = {
   dial0: '青桥',
   dial1: '玫瑰',
@@ -830,6 +831,13 @@ function isChapterGoal(n) {
 function chapterGoalReady() {
   return activeSigils.every(sigil => sigil.collected) && chapterRulesReady();
 }
+function checkGoalOpened() {
+  if (goalReadyAnnounced || !chapterGoalReady() || state.phase === 'ending') return;
+  goalReadyAnnounced = true;
+  showToast('目标开启');
+  tone(660, 0, 0.32, 0.035, 'triangle');
+  tone(990, 0.08, 0.38, 0.03, 'triangle');
+}
 function chapterRulesReady() {
   const rules = CHAPTERS[chapterIndex]?.rules || {};
   return Object.keys(rules).every(key => !rules[key] || ruleState[key]);
@@ -848,6 +856,7 @@ function markRule(key) {
   showToast(`${RULE_LABELS[key]}点亮`);
   updateHud();
   updateMechanicBeacons();
+  checkGoalOpened();
 }
 
 const mechanicColors = {
@@ -942,8 +951,9 @@ function collectSigil(n) {
   sigil.mesh.group.visible = false;
   const left = activeSigils.filter(s => !s.collected).length;
   tone(880 + activeSigils.indexOf(sigil) * 120, 0, 0.22, 0.035, 'triangle');
-  showToast(left ? `光印 ${activeSigils.length - left}/${activeSigils.length}` : '金色光环已打开');
+  showToast(left ? `光印 ${activeSigils.length - left}/${activeSigils.length}` : '光印完成');
   updateHud();
+  checkGoalOpened();
 }
 
 // ---------------------------------------------------------------- state / tweens
@@ -1221,7 +1231,7 @@ function updateHud() {
   const hud = $('chapterHud');
   hud.querySelector('.num').textContent = `${chapterNo(chapterIndex)} / ${CHAPTERS.length}`;
   hud.querySelector('.fill').style.width = `${((chapterIndex + 1) / CHAPTERS.length) * 100}%`;
-  hud.querySelector('.name').textContent = ch.name;
+  hud.querySelector('.name').textContent = `${ch.theme.name} · 第 ${Math.floor(chapterIndex / 4) + 1} 幕 · ${ch.name}`;
   const collected = activeSigils.filter(sigil => sigil.collected).length;
   const sigilText = activeSigils.length ? ` · 光印 ${collected}/${activeSigils.length}` : '';
   const rules = ruleProgressText();
@@ -1275,12 +1285,14 @@ function startChapter(i, opts = {}) {
   const ch = CHAPTERS[chapterIndex];
   chapterMoves = 0;
   ruleState = { dial0: false, dial1: false, portal: false, ride: false };
+  goalReadyAnnounced = false;
   applyChapterTheme(ch);
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
   updateGraph();
   chapterGoal = byId(ch.goal) || byId('goal');
   setupSigils(ch);
+  goalReadyAnnounced = chapterGoalReady();
 
   const start = byId(ch.start) || startNode;
   if (char.parent !== scene) scene.attach(char);
