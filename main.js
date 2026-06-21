@@ -45,7 +45,7 @@ const CHAPTERS = [
   { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', goal: 'n-5_4_0', r1: 0, r2: 2, upper: false, task: '穿过四级白阶,站上西露台中央', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
   { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', goal: 'r4', r1: 1, r2: 3, upper: false, task: '转动青色长桥,走到桥的入口', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
   { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', goal: 'n-8_4_-3', r1: 1, r2: 1, upper: false, task: '让长桥载你跨过空海,抵达门塔露台', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
-  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', goal: 'pLow', r1: 0, r2: 0, upper: false, task: '从旋转件中央走进蓝绿门槛', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
+  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', goal: 'pUp', r1: 0, r2: 0, upper: false, task: '从旋转件中央穿过蓝绿门槛', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
   { name: '蓝绿门槛', en: 'TEAL THRESHOLD', start: 'n-8_4_-3', goal: 'pUp', r1: 0, r2: 1, upper: false, task: '进入孪生门,记住出口的高度', target: [-7.2, 5.1, -4.1], zoom: 1.18 },
   { name: '高空回廊', en: 'HIGH CATWALK', start: 'pUp', goal: 'n-3_5_-5', r1: 0, r2: 1, upper: true, task: '从高处回廊寻找玫瑰机关', target: [-4.3, 5.4, -4.7], zoom: 1.16 },
   { name: '玫瑰转盘', en: 'ROSE DIAL', start: 'n-6_5_-5', goal: 'r2s', r1: 2, r2: 1, upper: true, task: '转动玫瑰楼梯,让第一段高度对齐', target: [-3.8, 5.4, -5.1], zoom: 1.18 },
@@ -55,7 +55,7 @@ const CHAPTERS = [
   { name: '双塔影子', en: 'TWIN TOWER SHADOW', start: 'n0_6_-5', goal: 'n2_6_-5', r1: 2, r2: 2, upper: true, task: '从峰顶回望两座塔,找到门廊方向', target: [0.1, 6.1, -5.4], zoom: 1.18 },
   { name: '树下短暂停留', en: 'UNDER THE TREE', start: 'n1_6_-4', goal: 'goal', r1: 0, r2: 3, upper: true, task: '绕过树影,走向神龛金门', target: [0.8, 6.2, -5.2], zoom: 1.2 },
   { name: '金色门廊', en: 'GOLDEN PORTICO', start: 'n2_6_-5', goal: 'goal', r1: 1, r2: 0, upper: true, task: '靠近神龛,别被近路迷惑', target: [1.1, 6.5, -5.7], zoom: 1.2 },
-  { name: '回旋试炼', en: 'SPIRAL TRIAL', start: 'n-5_4_-1', goal: 'pLow', r1: 1, r2: 1, upper: false, task: '从旧路重走,但要自己骑乘长桥', target: [-4.8, 4.2, -2.8], zoom: 1.13 },
+  { name: '回旋试炼', en: 'SPIRAL TRIAL', start: 'n-5_4_-1', goal: 'pUp', r1: 1, r2: 1, upper: false, task: '从旧路重走,但要自己骑乘长桥并穿过门', target: [-4.8, 4.2, -2.8], zoom: 1.13 },
   { name: '云海长线', en: 'CLOUDLINE RUN', start: 'n6_0_-1', goal: 'n-3_5_-5', r1: 1, r2: 1, upper: false, task: '串起低桥、传送门与高空回廊', target: [-2.2, 3.7, -2.6], zoom: 1.02 },
   { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', goal: 'goal', r1: 1, r2: 1, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
 ];
@@ -82,6 +82,28 @@ const CHAPTER_SIGILS = [
   ['n4_0_0', 'pLow', 'n-3_5_-5'],
 ];
 const CHAPTER_PARS = [1, 2, 2, 3, 3, 3, 5, 3, 2, 3, 4, 4, 3, 3, 2, 3, 2, 5, 8, 10];
+const CHAPTER_RULES = [
+  {},
+  {},
+  {},
+  {},
+  {},
+  { dial0: true },
+  { dial0: true, ride: true },
+  { portal: true },
+  { portal: true },
+  {},
+  { dial1: true },
+  { dial1: true },
+  { dial1: true, ride: true },
+  { dial1: true },
+  {},
+  {},
+  {},
+  { dial0: true, portal: true },
+  { dial0: true, dial1: true, portal: true },
+  { dial0: true, dial1: true, portal: true, ride: true },
+];
 const CHAPTER_THEMES = [
   { name: '晨雾', sky: ['#ffdfae', '#f6b3a0', '#d795bd', '#a982c8'], fog: 0xe2a3b3, goal: 0xffd27a, sigil: 0xfff3c1, door: 0x9af2de, note: '云海刚醒,路只露出第一笔' },
   { name: '浅潮', sky: ['#ffe9bd', '#b8e5d6', '#a8cbd1', '#8f9bc8'], fog: 0xb9d3d2, goal: 0xaef6df, sigil: 0xd8fff0, door: 0x7fe8d0, note: '潮声把断桥推近了一点' },
@@ -92,6 +114,7 @@ const CHAPTER_THEMES = [
 CHAPTERS.forEach((ch, i) => {
   ch.sigils = CHAPTER_SIGILS[i];
   ch.par = CHAPTER_PARS[i];
+  ch.rules = CHAPTER_RULES[i];
   ch.theme = CHAPTER_THEMES[Math.min(CHAPTER_THEMES.length - 1, Math.floor(i / 4))];
 });
 
@@ -782,13 +805,20 @@ goalBeacon.add(goalRing, goalCore);
 scene.add(goalBeacon);
 let chapterGoal = null;
 let activeSigils = [];
+let ruleState = { dial0: false, dial1: false, portal: false, ride: false };
+const RULE_LABELS = {
+  dial0: '青桥',
+  dial1: '玫瑰',
+  portal: '传送',
+  ride: '骑乘',
+};
 function updateGoalBeacon(t = simTime) {
   if (!chapterGoal || state.phase === 'ending') { goalBeacon.visible = false; return; }
   goalBeacon.visible = true;
   goalBeacon.position.set(chapterGoal.pos.x, chapterGoal.pos.y + 0.065 + Math.sin(t * 2.4) * 0.018, chapterGoal.pos.z);
   const s = 1 + Math.sin(t * 3.1) * 0.08;
   goalRing.scale.setScalar(s);
-  const ready = activeSigils.every(sigil => sigil.collected);
+  const ready = chapterGoalReady();
   goalRing.material.color.set(ready ? currentTheme.goal : 0xc7b6d8);
   goalCore.material.color.set(ready ? currentTheme.goal : 0xded3ec);
   goalRing.material.opacity = (ready ? 0.68 : 0.34) + Math.sin(t * 2.2) * 0.12;
@@ -798,7 +828,25 @@ function isChapterGoal(n) {
   return n && n === chapterGoal;
 }
 function chapterGoalReady() {
-  return activeSigils.every(sigil => sigil.collected);
+  return activeSigils.every(sigil => sigil.collected) && chapterRulesReady();
+}
+function chapterRulesReady() {
+  const rules = CHAPTERS[chapterIndex]?.rules || {};
+  return Object.keys(rules).every(key => !rules[key] || ruleState[key]);
+}
+function ruleProgressText() {
+  const rules = CHAPTERS[chapterIndex]?.rules || {};
+  return Object.keys(RULE_LABELS)
+    .filter(key => rules[key])
+    .map(key => `${RULE_LABELS[key]}${ruleState[key] ? '✓' : '○'}`)
+    .join(' ');
+}
+function markRule(key) {
+  const rules = CHAPTERS[chapterIndex]?.rules || {};
+  if (!rules[key] || ruleState[key]) return;
+  ruleState[key] = true;
+  showToast(`${RULE_LABELS[key]}点亮`);
+  updateHud();
 }
 
 const sigilMat = new THREE.MeshBasicMaterial({ color: 0xfff3c1, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
@@ -890,6 +938,7 @@ function doTeleport(n) {
   state.teleporting = true;
   charMat.opacity = 0;
   sfx.portal();
+  markRule('portal');
   if (n.portal === 'pUp') state.upperReached = true;
   tween(0.65, () => {}, () => {
     const pair = byId(n.portal);
@@ -899,7 +948,7 @@ function doTeleport(n) {
     collectSigil(pair);
     if (isChapterGoal(pair)) {
       if (chapterGoalReady()) win();
-      else showToast('还差光印');
+      else showToast(chapterRulesReady() ? '还差光印' : '机关未完成');
       return;
     }
     const nb = adj.get(pair.id)[0];
@@ -932,7 +981,7 @@ function stepWalker(dt) {
     if (isChapterGoal(b)) {
       walker.path = [];
       if (chapterGoalReady()) win();
-      else showToast('还差光印');
+      else showToast(chapterRulesReady() ? '还差光印' : '机关未完成');
       return;
     }
     if (b.portal) { walker.path = []; doTeleport(b); return; }
@@ -957,10 +1006,12 @@ function tapDial(i) {
   if (walker.path.length) { walker.pendingDial = i; recordMove(); return; }
   const dl = dials[i];
   recordMove();
+  markRule(i === 0 ? 'dial0' : 'dial1');
   state.rotating = true;
   dl.used = true;
   sfx.dial();
   const onRotor = walker.node.rotor === dl.rotor;
+  if (onRotor) markRule('ride');
   if (onRotor) dl.rotor.attach(char);
   const a0 = dl.angle;
   dl.angle += dl.dir * HALF_PI;
@@ -1105,8 +1156,10 @@ function updateHud() {
   hud.querySelector('.name').textContent = ch.name;
   const collected = activeSigils.filter(sigil => sigil.collected).length;
   const sigilText = activeSigils.length ? ` · 光印 ${collected}/${activeSigils.length}` : '';
+  const rules = ruleProgressText();
+  const ruleText = rules ? ` · 机关 ${rules}` : '';
   const best = bestMoves[chapterIndex] ? ` · 最佳 ${bestMoves[chapterIndex]}` : '';
-  hud.querySelector('.task').textContent = `${ch.task}${sigilText} · 操作 ${chapterMoves}/${ch.par}${best}`;
+  hud.querySelector('.task').textContent = `${ch.task}${sigilText}${ruleText} · 操作 ${chapterMoves}/${ch.par}${best}`;
 }
 function buildChapterMap() {
   const map = $('chapterMap');
@@ -1153,6 +1206,7 @@ function startChapter(i, opts = {}) {
   localStorage.setItem('valley.chapter', String(chapterIndex));
   const ch = CHAPTERS[chapterIndex];
   chapterMoves = 0;
+  ruleState = { dial0: false, dial1: false, portal: false, ride: false };
   applyChapterTheme(ch);
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
@@ -1386,7 +1440,7 @@ window.game = {
   walkTo: id => { const n = byId(id); if (n) requestWalk(n); },
   tapDial,
   startChapter,
-  chapter: () => ({ index: chapterIndex, best: bestChapter, moves: chapterMoves, bestMoves, bestRatings, data: CHAPTERS[chapterIndex] }),
+  chapter: () => ({ index: chapterIndex, best: bestChapter, moves: chapterMoves, rules: ruleState, bestMoves, bestRatings, data: CHAPTERS[chapterIndex] }),
   resetProgress: () => {
     localStorage.removeItem('valley.chapter');
     localStorage.removeItem('valley.bestChapter');
