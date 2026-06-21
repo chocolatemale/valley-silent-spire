@@ -950,6 +950,7 @@ function readStoredChapter(key) {
 }
 let chapterIndex = readStoredChapter('valley.chapter');
 let bestChapter = readStoredChapter('valley.bestChapter');
+bestChapter = Math.max(bestChapter, chapterIndex);
 
 function chapterNo(i) {
   return String(i + 1).padStart(2, '0');
@@ -969,6 +970,30 @@ function updateHud() {
   hud.querySelector('.fill').style.width = `${((chapterIndex + 1) / CHAPTERS.length) * 100}%`;
   hud.querySelector('.name').textContent = ch.name;
   hud.querySelector('.task').textContent = ch.task;
+}
+function buildChapterMap() {
+  const map = $('chapterMap');
+  map.textContent = '';
+  CHAPTERS.forEach((ch, i) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.title = `${chapterTitle(i)} · ${ch.name}`;
+    dot.setAttribute('aria-label', dot.title);
+    dot.addEventListener('click', () => {
+      if (i <= bestChapter) startChapter(i);
+      else showToast('尚未点亮');
+    });
+    map.appendChild(dot);
+  });
+}
+function updateChapterMap() {
+  const dots = $('chapterMap').querySelectorAll('button');
+  dots.forEach((dot, i) => {
+    dot.className = '';
+    if (i <= bestChapter) dot.classList.add('done');
+    else dot.classList.add('locked');
+    if (i === chapterIndex) dot.classList.add('current');
+  });
 }
 function showToast(text) {
   const toast = $('chapterToast');
@@ -1035,12 +1060,14 @@ function startChapter(i, opts = {}) {
   $('title').style.opacity = '0';
   $('hint').style.opacity = opts.intro ? '0' : '1';
   $('chapterHud').classList.toggle('show', !opts.intro);
+  $('chapterMap').classList.toggle('show', !opts.intro);
   const end = $('end');
   end.style.opacity = '0';
   end.classList.remove('show');
   setOverlayText($('title'), 'V A L L E Y', `${chapterTitle(chapterIndex)} · ${ch.name}`, '下一章');
   setOverlayText(end, chapterTitle(chapterIndex), `${ch.name} · ${ch.en}`, chapterIndex === CHAPTERS.length - 1 ? '重 游 第一章' : '下 一 章');
   updateHud();
+  updateChapterMap();
   updateGoalBeacon();
   if (!opts.intro) {
     showToast(`${chapterTitle(chapterIndex)} · ${ch.name}`);
@@ -1075,6 +1102,8 @@ function stepIntro(dt) {
   if (k >= 1) {
     state.phase = 'play';
     $('chapterHud').classList.add('show');
+    $('chapterMap').classList.add('show');
+    updateChapterMap();
     $('hint').style.opacity = '1';
     setTimeout(() => { $('hint').style.opacity = '0'; }, 9000);
   }
@@ -1082,8 +1111,9 @@ function stepIntro(dt) {
 
 function win() {
   state.phase = 'ending';
-  bestChapter = Math.max(bestChapter, chapterIndex);
+  bestChapter = Math.max(bestChapter, Math.min(chapterIndex + 1, CHAPTERS.length - 1));
   localStorage.setItem('valley.bestChapter', String(bestChapter));
+  updateChapterMap();
   document.body.style.cursor = 'default';
   $('hint').style.opacity = '0';
   sfx.win();
@@ -1192,6 +1222,7 @@ addEventListener('resize', () => {
   applyCamera();
 });
 
+buildChapterMap();
 startChapter(chapterIndex, { intro: true });
 
 // ---------------------------------------------------------------- debug api

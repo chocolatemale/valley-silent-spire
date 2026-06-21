@@ -22,6 +22,12 @@
   #chapterHud .task { margin-top:6px; font-size:11px; letter-spacing:.2em; line-height:1.75; color:rgba(255,250,242,.68); }
   #chapterToast { position:fixed; left:50%; top:14vh; transform:translate(-50%,-10px); color:#fffdf8; font:300 13px 'Noto Serif SC','Songti SC',serif; letter-spacing:.42em; text-shadow:0 1px 22px rgba(102,58,92,.56); opacity:0; pointer-events:none; transition:opacity .8s ease, transform .8s ease; white-space:nowrap; }
   #chapterToast.show { opacity:1; transform:translate(-50%,0); }
+  #chapterMap { position:fixed; right:18px; top:18px; display:grid; grid-template-columns:repeat(5,12px); gap:9px; padding:2px; opacity:0; transform:translateY(-8px); transition:opacity 1s ease, transform 1s ease; pointer-events:none; }
+  #chapterMap.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+  #chapterMap button { width:12px; height:12px; border:1px solid rgba(255,252,246,.42); border-radius:50%; padding:0; background:rgba(255,252,246,.1); box-shadow:0 1px 10px rgba(100,56,92,.2); cursor:pointer; }
+  #chapterMap button.done { background:rgba(255,252,246,.62); border-color:rgba(255,252,246,.82); }
+  #chapterMap button.current { background:#ffe2a0; border-color:#fff7db; box-shadow:0 0 18px rgba(255,226,160,.8); }
+  #chapterMap button.locked { opacity:.28; cursor:default; }
   #veil { position:fixed; inset:0; background:linear-gradient(#ffe8cd,#b98ecd); opacity:1; transition:opacity 2.4s ease; pointer-events:none; }
   #again { margin-top:34px; font:300 13px 'Noto Serif SC','Songti SC',serif; letter-spacing:.4em; padding-left:.4em; color:rgba(255,252,246,.75); border:1px solid rgba(255,252,246,.45); border-radius:999px; padding:10px 26px 10px 32px; cursor:pointer; pointer-events:none; transition:all .4s ease; }
   #end.show #again { pointer-events:auto; }
@@ -35,6 +41,7 @@
 <div class="overlay" id="end"><div class="big">第 一 章</div><div class="small">寂静尖塔 · THE SILENT SPIRE</div><div id="again" onclick="location.reload()">再 来 一 次</div></div>
 <div id="chapterHud"><div class="line"><span class="num">01 / 20</span><span class="bar"><span class="fill"></span></span></div><div class="name">寂静尖塔</div><div class="task">点击地面行走 · 点击转盘旋转空间</div></div>
 <div id="chapterToast">新的章节点亮了</div>
+<div id="chapterMap"></div>
 <div id="hint">点击地面行走 · 点击转盘旋转空间</div>
 <div id="veil"></div>
 <script type="importmap">
