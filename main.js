@@ -82,7 +82,18 @@ const CHAPTER_SIGILS = [
   ['n4_0_0', 'pLow', 'n-3_5_-5'],
 ];
 const CHAPTER_PARS = [1, 2, 2, 3, 3, 3, 5, 3, 2, 3, 4, 4, 3, 3, 2, 3, 2, 5, 8, 10];
-CHAPTERS.forEach((ch, i) => { ch.sigils = CHAPTER_SIGILS[i]; ch.par = CHAPTER_PARS[i]; });
+const CHAPTER_THEMES = [
+  { name: '晨雾', sky: ['#ffdfae', '#f6b3a0', '#d795bd', '#a982c8'], fog: 0xe2a3b3, goal: 0xffd27a, sigil: 0xfff3c1, door: 0x9af2de, note: '云海刚醒,路只露出第一笔' },
+  { name: '浅潮', sky: ['#ffe9bd', '#b8e5d6', '#a8cbd1', '#8f9bc8'], fog: 0xb9d3d2, goal: 0xaef6df, sigil: 0xd8fff0, door: 0x7fe8d0, note: '潮声把断桥推近了一点' },
+  { name: '玫瑰', sky: ['#ffd5cb', '#f3a8b9', '#c790c9', '#7f80b7'], fog: 0xd49ac4, goal: 0xffb6cd, sigil: 0xffd6e4, door: 0x9feee2, note: '玫瑰楼梯开始记住你的脚步' },
+  { name: '暮蓝', sky: ['#d7e7ff', '#9fb6de', '#8a89c6', '#5f638f'], fog: 0x9aa5ce, goal: 0xb7d8ff, sigil: 0xd4e7ff, door: 0x89dbff, note: '两座塔的影子重叠在一起' },
+  { name: '金夜', sky: ['#ffe7a8', '#e8b976', '#b77f9a', '#555485'], fog: 0xc08aa8, goal: 0xffe28a, sigil: 0xfff0b8, door: 0x8cebdc, note: '最后的光线会记住最短的路' },
+];
+CHAPTERS.forEach((ch, i) => {
+  ch.sigils = CHAPTER_SIGILS[i];
+  ch.par = CHAPTER_PARS[i];
+  ch.theme = CHAPTER_THEMES[Math.min(CHAPTER_THEMES.length - 1, Math.floor(i / 4))];
+});
 
 const deg = THREE.MathUtils.degToRad;
 const clamp = THREE.MathUtils.clamp;
@@ -101,18 +112,30 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(PAL.fog, 40, 96);
 
-{
+function makeSkyTexture(stops) {
   const c = document.createElement('canvas'); c.width = 2; c.height = 512;
   const ctx = c.getContext('2d');
   const g = ctx.createLinearGradient(0, 0, 0, 512);
-  g.addColorStop(0.00, PAL.skyTop);
-  g.addColorStop(0.45, PAL.skyMid);
-  g.addColorStop(0.75, PAL.skyLow);
-  g.addColorStop(1.00, PAL.skyBot);
+  g.addColorStop(0.00, stops[0]);
+  g.addColorStop(0.45, stops[1]);
+  g.addColorStop(0.75, stops[2]);
+  g.addColorStop(1.00, stops[3]);
   ctx.fillStyle = g; ctx.fillRect(0, 0, 2, 512);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  scene.background = tex;
+  return tex;
+}
+let skyTexture = makeSkyTexture([PAL.skyTop, PAL.skyMid, PAL.skyLow, PAL.skyBot]);
+scene.background = skyTexture;
+let currentTheme = CHAPTER_THEMES[0];
+function applyChapterTheme(ch) {
+  currentTheme = ch.theme || CHAPTER_THEMES[0];
+  if (skyTexture) skyTexture.dispose();
+  skyTexture = makeSkyTexture(currentTheme.sky);
+  scene.background = skyTexture;
+  scene.fog.color.set(currentTheme.fog);
+  doorLight.color.set(currentTheme.door);
+  doorLight2.color.set(currentTheme.door);
 }
 
 // ---------------------------------------------------------------- camera
@@ -766,8 +789,8 @@ function updateGoalBeacon(t = simTime) {
   const s = 1 + Math.sin(t * 3.1) * 0.08;
   goalRing.scale.setScalar(s);
   const ready = activeSigils.every(sigil => sigil.collected);
-  goalRing.material.color.set(ready ? PAL.goalGlow : 0xc7b6d8);
-  goalCore.material.color.set(ready ? 0xfff5cf : 0xded3ec);
+  goalRing.material.color.set(ready ? currentTheme.goal : 0xc7b6d8);
+  goalCore.material.color.set(ready ? currentTheme.goal : 0xded3ec);
   goalRing.material.opacity = (ready ? 0.68 : 0.34) + Math.sin(t * 2.2) * 0.12;
   goalCore.material.opacity = (ready ? 0.34 : 0.16) + Math.sin(t * 2.8) * 0.06;
 }
@@ -804,6 +827,8 @@ function updateSigils(t = simTime) {
     if (!mesh.group.visible) return;
     mesh.group.position.set(sigil.node.pos.x, sigil.node.pos.y + 0.12 + Math.sin(t * 3 + i) * 0.04, sigil.node.pos.z);
     const scale = 1 + Math.sin(t * 4.1 + i * 0.7) * 0.1;
+    mesh.ring.material.color.set(currentTheme.sigil);
+    mesh.core.material.color.set(0xffffff);
     mesh.ring.scale.setScalar(scale);
     mesh.ring.material.opacity = 0.72 + Math.sin(t * 3.5 + i) * 0.16;
     mesh.core.material.opacity = 0.42 + Math.sin(t * 4.2 + i) * 0.12;
@@ -1128,6 +1153,7 @@ function startChapter(i, opts = {}) {
   localStorage.setItem('valley.chapter', String(chapterIndex));
   const ch = CHAPTERS[chapterIndex];
   chapterMoves = 0;
+  applyChapterTheme(ch);
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
   updateGraph();
@@ -1186,7 +1212,7 @@ function startChapter(i, opts = {}) {
   updateChapterMap();
   updateGoalBeacon();
   if (!opts.intro) {
-    showToast(`${chapterTitle(chapterIndex)} · ${ch.name}`);
+    showToast(`${ch.theme.name} · ${ch.theme.note}`);
     setTimeout(() => { $('hint').style.opacity = '0'; }, 4200);
   }
 }
