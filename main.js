@@ -104,6 +104,28 @@ const CHAPTER_RULES = [
   { dial0: true, dial1: true, portal: true },
   { dial0: true, dial1: true, portal: true, ride: true },
 ];
+const CHAPTER_MAPS = [
+  ['start', 'bridge'],
+  ['start', 'bridge', 'plaza'],
+  ['bridge', 'plaza', 'stairs'],
+  ['plaza', 'stairs', 'west'],
+  ['stairs', 'west'],
+  ['plaza', 'stairs', 'west', 'rotor1'],
+  ['plaza', 'stairs', 'west', 'rotor1', 'portal'],
+  ['west', 'rotor1', 'portal'],
+  ['portal', 'upper'],
+  ['portal', 'upper', 'rotor2'],
+  ['upper', 'rotor2'],
+  ['upper', 'rotor2', 'summit'],
+  ['rotor2', 'summit'],
+  ['portal', 'rotor2', 'summit'],
+  ['summit'],
+  ['upper', 'summit'],
+  ['portal', 'summit'],
+  ['plaza', 'stairs', 'west', 'rotor1', 'portal', 'upper'],
+  ['start', 'bridge', 'plaza', 'stairs', 'west', 'rotor1', 'portal', 'upper', 'rotor2'],
+  ['start', 'bridge', 'plaza', 'stairs', 'west', 'rotor1', 'portal', 'upper', 'rotor2', 'summit'],
+];
 const CHAPTER_THEMES = [
   { name: '晨雾', sky: ['#ffdfae', '#f6b3a0', '#d795bd', '#a982c8'], fog: 0xe2a3b3, goal: 0xffd27a, sigil: 0xfff3c1, door: 0x9af2de, note: '云海刚醒,路只露出第一笔' },
   { name: '浅潮', sky: ['#ffe9bd', '#b8e5d6', '#a8cbd1', '#8f9bc8'], fog: 0xb9d3d2, goal: 0xaef6df, sigil: 0xd8fff0, door: 0x7fe8d0, note: '潮声把断桥推近了一点' },
@@ -115,6 +137,7 @@ CHAPTERS.forEach((ch, i) => {
   ch.sigils = CHAPTER_SIGILS[i];
   ch.par = CHAPTER_PARS[i];
   ch.rules = CHAPTER_RULES[i];
+  ch.map = CHAPTER_MAPS[i];
   ch.theme = CHAPTER_THEMES[Math.min(CHAPTER_THEMES.length - 1, Math.floor(i / 4))];
 });
 
@@ -397,6 +420,31 @@ const staticMesh = new THREE.Mesh(
 staticMesh.castShadow = staticMesh.receiveShadow = true;
 scene.add(staticMesh);
 
+const mapMaskMat = new THREE.MeshBasicMaterial({
+  color: 0xfff5e8,
+  transparent: true,
+  opacity: 0.76,
+  depthWrite: false,
+  fog: false,
+});
+const mapMasks = [
+  { key: 'start', mesh: new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.2, 4.4), mapMaskMat.clone()), pos: [7, 0.28, 0] },
+  { key: 'bridge', mesh: new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.2, 1.7), mapMaskMat.clone()), pos: [4.5, 0.28, 0] },
+  { key: 'plaza', mesh: new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.2, 4.2), mapMaskMat.clone()), pos: [2, 0.28, 0] },
+  { key: 'stairs', mesh: new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.2, 2.1), mapMaskMat.clone()), pos: [-1.5, 3.95, 0] },
+  { key: 'west', mesh: new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.2, 4.2), mapMaskMat.clone()), pos: [-4.8, 4.35, 0] },
+  { key: 'rotor1', mesh: new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 6.2), mapMaskMat.clone()), pos: [-8, 4.35, 0] },
+  { key: 'portal', mesh: new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.2, 4.5), mapMaskMat.clone()), pos: [-8, 5.35, -4.7] },
+  { key: 'upper', mesh: new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.2, 2.2), mapMaskMat.clone()), pos: [-4.8, 5.35, -5] },
+  { key: 'rotor2', mesh: new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.2, 2.4), mapMaskMat.clone()), pos: [-1.6, 6.35, -5] },
+  { key: 'summit', mesh: new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.2, 4.4), mapMaskMat.clone()), pos: [1, 6.35, -5.4] },
+];
+mapMasks.forEach(({ mesh, pos }) => {
+  mesh.position.set(...pos);
+  mesh.renderOrder = 8;
+  scene.add(mesh);
+});
+
 // ---------------------------------------------------------------- rotors
 // rotor 1 — the long bar (teal), rides like a carousel
 const rotor1 = new THREE.Group();
@@ -666,6 +714,44 @@ addNode(1, 6, -6, {
 
 const startNode = nodes.find(n => n.id === 'n7_0_0');
 const byId = id => nodes.find(n => n.id === id);
+let activeMapRegions = new Set(CHAPTER_MAPS[0]);
+
+function regionForNode(n) {
+  if (n.id === 'goal' || n.pos.y >= 6) return 'summit';
+  if (n.id === 'r2s' || n.id === 'r2l') return 'rotor2';
+  if (n.id === 'pLow' || n.id === 'pUp') return 'portal';
+  if (n.id.startsWith('r')) return 'rotor1';
+  if (n.pos.x <= -7 && n.pos.y >= 4 && n.pos.z <= -3) return 'portal';
+  if (n.pos.y === 5 && n.pos.z === -5) return 'upper';
+  if (n.pos.x <= -4 && n.pos.y === 4) return 'west';
+  if (n.pos.x <= 0 && n.pos.y > 0 && n.pos.y < 4) return 'stairs';
+  if (n.pos.x >= 1 && n.pos.x <= 3 && n.pos.y === 0) return 'plaza';
+  if (n.pos.x >= 4 && n.pos.x <= 5 && n.pos.y === 0) return 'bridge';
+  if (n.pos.x >= 6 && n.pos.y === 0) return 'start';
+  return 'summit';
+}
+function nodeActive(n) {
+  return activeMapRegions.has(regionForNode(n));
+}
+function applyChapterMap(ch) {
+  activeMapRegions = new Set(ch.map || CHAPTER_MAPS[CHAPTER_MAPS.length - 1]);
+  for (const n of nodes) {
+    const active = nodeActive(n);
+    n.active = active;
+    n.proxy.visible = active;
+  }
+  mapMasks.forEach(({ key, mesh }, i) => {
+    const active = activeMapRegions.has(key);
+    mesh.visible = !active;
+    mesh.material.opacity = 0.62 + (i % 3) * 0.06;
+    mesh.material.color.set(currentTheme.sky[0]);
+  });
+  dials[0].group.visible = activeMapRegions.has('plaza') || activeMapRegions.has('rotor1');
+  dials[0].hit.visible = dials[0].group.visible;
+  dials[1].group.visible = activeMapRegions.has('upper') || activeMapRegions.has('rotor2');
+  dials[1].hit.visible = dials[1].group.visible;
+  document.documentElement.dataset.mapRegions = [...activeMapRegions].join(',');
+}
 
 function portsOf(n) {
   const p = n.pos;
@@ -700,6 +786,7 @@ function updateGraph() {
   const portMap = new Map();
   adj = new Map(nodes.map(n => [n.id, []]));
   for (const n of nodes) {
+    if (!nodeActive(n)) continue;
     for (const p of portsOf(n)) {
       const key = `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)},${Math.round(p[2] * 2)}`;
       if (!portMap.has(key)) portMap.set(key, []);
@@ -1040,6 +1127,7 @@ function busy() { return state.rotating || state.teleporting; }
 
 function requestWalk(target) {
   if (state.phase !== 'play' || busy()) return;
+  if (!nodeActive(target)) return;
   if (target === walker.node) { clearPathPreview(); showMarker(target.pos, true); return; }
   if (walker.path.length) { walker.pending = target; showMarker(target.pos, true); return; }
   startWalk(target, true, true);
@@ -1226,7 +1314,7 @@ composer.addPass(gradePass);
 
 // ---------------------------------------------------------------- intro / ending
 const $ = id => document.getElementById(id);
-const PROGRESS_VERSION = 'depth-pass-2026-06-22';
+const PROGRESS_VERSION = 'map-pass-2026-06-22';
 if (localStorage.getItem('valley.progressVersion') !== PROGRESS_VERSION) {
   localStorage.removeItem('valley.bestMoves');
   localStorage.removeItem('valley.bestRatings');
@@ -1236,7 +1324,11 @@ function readStoredChapter(key) {
   const v = Number(localStorage.getItem(key) || 0);
   return Number.isFinite(v) ? clamp(v, 0, CHAPTERS.length - 1) : 0;
 }
-let chapterIndex = readStoredChapter('valley.chapter');
+function readChapterParam() {
+  const v = Number(new URLSearchParams(location.search).get('chapter'));
+  return Number.isFinite(v) && v >= 1 && v <= CHAPTERS.length ? v - 1 : null;
+}
+let chapterIndex = readChapterParam() ?? readStoredChapter('valley.chapter');
 let bestChapter = readStoredChapter('valley.bestChapter');
 bestChapter = Math.max(bestChapter, chapterIndex);
 function readJsonRecord(key, fallback) {
@@ -1353,6 +1445,7 @@ function startChapter(i, opts = {}) {
   applyChapterTheme(ch);
   resetRotor(dials[0], ch.r1 || 0);
   resetRotor(dials[1], ch.r2 || 0);
+  applyChapterMap(ch);
   updateGraph();
   chapterGoal = byId(ch.goal) || byId('goal');
   setupSigils(ch);
@@ -1590,6 +1683,7 @@ window.game = {
   tapDial,
   startChapter,
   chapter: () => ({ index: chapterIndex, best: bestChapter, moves: chapterMoves, rules: ruleState, bestMoves, bestRatings, data: CHAPTERS[chapterIndex] }),
+  mapRegions: () => [...activeMapRegions],
   pathPreviewVisible: () => pathPreviewNodes.filter(m => m.visible).length,
   resetProgress: () => {
     localStorage.removeItem('valley.chapter');
