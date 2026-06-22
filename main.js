@@ -790,6 +790,60 @@ function showMarker(pos, ok) {
   markerAnim = { t: 0 };
 }
 
+const pathPreview = new THREE.Group();
+scene.add(pathPreview);
+const pathPreviewNodes = [];
+function syncPathPreviewDebug() {
+  document.documentElement.dataset.pathPreview = String(pathPreviewNodes.filter(m => m.visible).length);
+}
+function ensurePathPreviewNode(i) {
+  if (pathPreviewNodes[i]) return pathPreviewNodes[i];
+  const m = new THREE.Mesh(
+    new THREE.RingGeometry(0.11, 0.15, 24),
+    new THREE.MeshBasicMaterial({
+      color: PAL.goalGlow,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      toneMapped: false,
+    }),
+  );
+  m.rotation.x = -HALF_PI;
+  m.visible = false;
+  pathPreview.add(m);
+  pathPreviewNodes[i] = m;
+  return m;
+}
+function clearPathPreview() {
+  pathPreviewNodes.forEach(m => { m.visible = false; });
+  syncPathPreviewDebug();
+}
+function showPathPreview(path) {
+  clearPathPreview();
+  if (!path || path.length < 2) return;
+  path.slice(1, 18).forEach((n, i) => {
+    const m = ensurePathPreviewNode(i);
+    const baseOpacity = Math.max(0.2, 0.58 - i * 0.026);
+    m.position.set(n.pos.x, n.pos.y + 0.072, n.pos.z);
+    m.material.color.set(currentTheme.goal);
+    m.material.opacity = baseOpacity;
+    m.userData.baseOpacity = baseOpacity;
+    m.userData.baseScale = 0.76 + Math.min(i, 6) * 0.035;
+    m.scale.setScalar(m.userData.baseScale);
+    m.visible = true;
+  });
+  syncPathPreviewDebug();
+}
+function updatePathPreview(t = simTime) {
+  pathPreviewNodes.forEach((m, i) => {
+    if (!m.visible) return;
+    const pulse = Math.sin(t * 3.8 - i * 0.55) * 0.08;
+    m.material.opacity = m.userData.baseOpacity + pulse;
+    m.scale.setScalar(m.userData.baseScale + Math.max(0, pulse) * 0.28);
+  });
+}
+
 const goalBeacon = new THREE.Group();
 const goalRing = new THREE.Mesh(
   new THREE.RingGeometry(0.34, 0.48, 44),
@@ -986,18 +1040,20 @@ function busy() { return state.rotating || state.teleporting; }
 
 function requestWalk(target) {
   if (state.phase !== 'play' || busy()) return;
-  if (target === walker.node) { showMarker(target.pos, true); return; }
+  if (target === walker.node) { clearPathPreview(); showMarker(target.pos, true); return; }
   if (walker.path.length) { walker.pending = target; showMarker(target.pos, true); return; }
-  startWalk(target, true);
+  startWalk(target, true, true);
 }
-function startWalk(target, click) {
+function startWalk(target, click, preview = click) {
   const p = findPath(walker.node, target);
-  if (!p) { showMarker(target.pos, false); return; }
+  if (!p) { clearPathPreview(); showMarker(target.pos, false); return; }
   walker.path = p; walker.seg = 0; walker.t = 0;
+  if (preview) showPathPreview(p);
   if (click) { recordMove(); showMarker(target.pos, true); sfx.walk(); }
 }
 
 function doTeleport(n) {
+  clearPathPreview();
   state.teleporting = true;
   charMat.opacity = 0;
   sfx.portal();
@@ -1043,6 +1099,7 @@ function stepWalker(dt) {
     collectSigil(b);
     if (isChapterGoal(b)) {
       walker.path = [];
+      clearPathPreview();
       if (chapterGoalReady()) win();
       else showToast(chapterRulesReady() ? '还差光印' : '机关未完成');
       return;
@@ -1050,10 +1107,11 @@ function stepWalker(dt) {
     if (b.portal) { walker.path = []; doTeleport(b); return; }
     if (walker.seg >= walker.path.length - 1) {
       walker.path = [];
+      clearPathPreview();
       if (walker.pendingDial !== null) { const i = walker.pendingDial; walker.pendingDial = null; tapDial(i); }
     } else if (walker.pending) {
       const t2 = walker.pending; walker.pending = null; walker.path = [];
-      startWalk(t2, false);
+      startWalk(t2, false, true);
     }
   } else {
     char.position.lerpVectors(_from, _to, walker.t);
@@ -1310,6 +1368,7 @@ function startChapter(i, opts = {}) {
   charMat.opacity = 1;
   markerAnim = null;
   marker.material.opacity = 0;
+  clearPathPreview();
 
   state.phase = opts.intro ? 'intro' : 'play';
   state.rotating = false;
@@ -1494,6 +1553,7 @@ function step(dt) {
       marker.scale.setScalar(0.7 + markerAnim.t * 0.9);
     }
   }
+  updatePathPreview(t);
   updateGoalBeacon(t);
   updateSigils(t);
   updateMechanicBeacons(t);
@@ -1524,6 +1584,7 @@ window.game = {
   tapDial,
   startChapter,
   chapter: () => ({ index: chapterIndex, best: bestChapter, moves: chapterMoves, rules: ruleState, bestMoves, bestRatings, data: CHAPTERS[chapterIndex] }),
+  pathPreviewVisible: () => pathPreviewNodes.filter(m => m.visible).length,
   resetProgress: () => {
     localStorage.removeItem('valley.chapter');
     localStorage.removeItem('valley.bestChapter');
