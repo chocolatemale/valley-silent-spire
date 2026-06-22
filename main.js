@@ -38,14 +38,14 @@ const HALF_PI = Math.PI / 2;
 const USE_GTAO = true;
 
 const CHAPTERS = [
-  { name: '寂静尖塔', en: 'THE SILENT SPIRE', start: 'n7_0_0', goal: 'n4_0_0', r1: 0, r2: 1, upper: false, task: '走过第一段低桥,抵达金色光环', target: [-1.4, 3.2, -1.8], zoom: 1 },
-  { name: '风从东门来', en: 'EAST WIND GATE', start: 'n6_0_1', goal: 'n2_0_0', r1: 1, r2: 1, upper: false, task: '从错开的起点找回主塔广场', target: [-1.8, 3.3, -1.5], zoom: 1.04 },
-  { name: '低桥回声', en: 'LOW BRIDGE ECHO', start: 'n4_0_0', goal: 'n-1_1.5_0', r1: 1, r2: 0, upper: false, task: '沿白色阶梯向上,抵达第二级台阶', target: [-2.2, 3.1, -1.4], zoom: 1.08 },
-  { name: '主塔广场', en: 'PLAZA OF KEYS', start: 'n2_0_0', goal: 'n-3_3.5_0', r1: 2, r2: 1, upper: false, task: '从广场登到西侧高处', target: [-2.4, 3.2, -1.8], zoom: 1.08 },
-  { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', goal: 'n-5_4_0', r1: 0, r2: 2, upper: false, task: '穿过四级白阶,站上西露台中央', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
-  { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', goal: 'r4', r1: 1, r2: 3, upper: false, task: '转动青色长桥,走到桥的入口', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
-  { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', goal: 'n-8_4_-3', r1: 1, r2: 1, upper: false, task: '让长桥载你跨过空海,抵达门塔露台', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
-  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', goal: 'pUp', r1: 0, r2: 0, upper: false, task: '从旋转件中央穿过蓝绿门槛', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
+  { name: '寂静尖塔', en: 'THE SILENT SPIRE', start: 'n7_0_0', goal: 'n4_0_0', r1: 0, r2: 1, upper: false, task: '先点亮岛上两枚光印,再走过低桥', target: [-1.4, 3.2, -1.8], zoom: 1 },
+  { name: '风从东门来', en: 'EAST WIND GATE', start: 'n6_0_1', goal: 'n2_0_0', r1: 1, r2: 1, upper: false, task: '绕回东侧与主塔角落,再进入广场', target: [-1.8, 3.3, -1.5], zoom: 1.04 },
+  { name: '低桥回声', en: 'LOW BRIDGE ECHO', start: 'n4_0_0', goal: 'n-1_1.5_0', r1: 1, r2: 0, upper: false, task: '在广场两侧取光,再沿白阶上行', target: [-2.2, 3.1, -1.4], zoom: 1.08 },
+  { name: '主塔广场', en: 'PLAZA OF KEYS', start: 'n2_0_0', goal: 'n-3_3.5_0', r1: 2, r2: 1, upper: false, task: '扫过广场三个角,找到西侧高处', target: [-2.4, 3.2, -1.8], zoom: 1.08 },
+  { name: '四级白阶', en: 'FOUR WHITE STEPS', start: 'n0_0.5_0', goal: 'n-5_4_0', r1: 0, r2: 2, upper: false, task: '沿白阶上行后折向露台边缘取光', target: [-2.9, 3.5, -1.4], zoom: 1.1 },
+  { name: '西露台', en: 'WEST BALCONY', start: 'n-3_3.5_0', goal: 'r4', r1: 1, r2: 3, upper: false, task: '先清空西露台光印,再转动青桥', target: [-4.4, 4.1, -0.6], zoom: 1.16 },
+  { name: '潮汐转桥', en: 'TIDAL BRIDGE', start: 'n-5_4_1', goal: 'n-8_4_-3', r1: 1, r2: 1, upper: false, task: '踩上长桥、随它转向,再抵达门塔露台', target: [-6.1, 4.2, -0.7], zoom: 1.18 },
+  { name: '轴心漫步', en: 'AXIS WALK', start: 'r2', goal: 'pUp', r1: 0, r2: 0, upper: false, task: '沿旋转轴取光,穿过蓝绿门槛', target: [-7.1, 4.4, -1.5], zoom: 1.2 },
   { name: '蓝绿门槛', en: 'TEAL THRESHOLD', start: 'n-8_4_-3', goal: 'pUp', r1: 0, r2: 1, upper: false, task: '进入孪生门,记住出口的高度', target: [-7.2, 5.1, -4.1], zoom: 1.18 },
   { name: '高空回廊', en: 'HIGH CATWALK', start: 'pUp', goal: 'n-3_5_-5', r1: 0, r2: 1, upper: true, task: '从高处回廊寻找玫瑰机关', target: [-4.3, 5.4, -4.7], zoom: 1.16 },
   { name: '玫瑰转盘', en: 'ROSE DIAL', start: 'n-6_5_-5', goal: 'r2s', r1: 2, r2: 1, upper: true, task: '转动玫瑰楼梯,让第一段高度对齐', target: [-3.8, 5.4, -5.1], zoom: 1.18 },
@@ -60,14 +60,14 @@ const CHAPTERS = [
   { name: '二十盏光', en: 'TWENTY LIGHTS', start: 'n7_0_0', goal: 'goal', r1: 1, r2: 1, upper: false, task: '最后一次登塔,把所有机关连成一条线', target: [-1.4, 3.2, -1.8], zoom: 1 },
 ];
 const CHAPTER_SIGILS = [
-  [],
-  ['n5_0_0'],
-  ['n2_0_-1'],
-  ['n3_0_1', 'n0_0.5_0'],
-  ['n-1_1.5_0', 'n-4_4_0'],
-  ['n-5_4_-1'],
-  ['n-5_4_0', 'n-8_4_-3'],
-  ['n-8_4_-3'],
+  ['n8_0_1', 'n6_0_-1'],
+  ['n8_0_0', 'n5_0_0', 'n3_0_-1'],
+  ['n2_0_-1', 'n1_0_0', 'n0_0.5_0'],
+  ['n3_0_1', 'n1_0_-1', 'n0_0.5_0'],
+  ['n-1_1.5_0', 'n-3_3.5_0', 'n-5_4_1'],
+  ['n-5_4_1', 'n-5_4_-1'],
+  ['n-5_4_0', 'r2', 'n-8_4_-3'],
+  ['r0', 'n-8_4_-3', 'pLow'],
   ['pLow'],
   ['n-6_5_-5', 'n-4_5_-5'],
   ['n-5_5_-5'],
@@ -81,7 +81,7 @@ const CHAPTER_SIGILS = [
   ['n2_0_0', 'pLow', 'n-5_5_-5'],
   ['n4_0_0', 'pLow', 'n-3_5_-5'],
 ];
-const CHAPTER_PARS = [1, 2, 2, 3, 3, 3, 5, 3, 2, 3, 4, 4, 3, 3, 2, 3, 2, 5, 8, 10];
+const CHAPTER_PARS = [4, 5, 5, 5, 5, 5, 7, 6, 3, 4, 5, 5, 4, 4, 3, 4, 3, 6, 9, 11];
 const CHAPTER_RULES = [
   {},
   {},
@@ -1226,6 +1226,12 @@ composer.addPass(gradePass);
 
 // ---------------------------------------------------------------- intro / ending
 const $ = id => document.getElementById(id);
+const PROGRESS_VERSION = 'depth-pass-2026-06-22';
+if (localStorage.getItem('valley.progressVersion') !== PROGRESS_VERSION) {
+  localStorage.removeItem('valley.bestMoves');
+  localStorage.removeItem('valley.bestRatings');
+  localStorage.setItem('valley.progressVersion', PROGRESS_VERSION);
+}
 function readStoredChapter(key) {
   const v = Number(localStorage.getItem(key) || 0);
   return Number.isFinite(v) ? clamp(v, 0, CHAPTERS.length - 1) : 0;
